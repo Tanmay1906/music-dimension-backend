@@ -63,7 +63,7 @@ app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Music Dimension API V1");
-    c.RoutePrefix = "swagger";
+    c.RoutePrefix = string.Empty; // Set Swagger UI at root
 });
 
 if (app.Environment.IsDevelopment())
@@ -76,11 +76,6 @@ else
     app.UseHsts();
 }
 
-// Redirect root to Swagger UI
-app.MapGet("/", () => Results.Redirect("/swagger"));
-
-app.UseHttpsRedirection();
-app.UseStaticFiles();
 app.UseRouting();
 
 // Enable CORS
