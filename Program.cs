@@ -15,6 +15,9 @@ builder.Configuration.AddJsonFile("appsettings.json", optional: false);
 // Add controllers
 builder.Services.AddControllers();
 
+// Add health checks
+builder.Services.AddHealthChecks();
+
 // Add Swagger for API documentation
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -47,16 +50,19 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAll", builder =>
     {
         builder.WithOrigins(
-                "https://Tanmay1906.github.io",
-                "https://music-dimension.onrender.com",
+                "https://musicdimension-orcin.vercel.app",
                 "http://localhost:3000"
             )
                .AllowAnyMethod()
-               .AllowAnyHeader();
+               .AllowAnyHeader()
+               .AllowCredentials();
     });
 });
 
 var app = builder.Build();
+
+// Map health check endpoint
+app.MapHealthChecks("/health");
 
 // Always enable Swagger in all environments
 app.UseSwagger();
@@ -76,10 +82,10 @@ else
     app.UseHsts();
 }
 
-app.UseRouting();
-
-// Enable CORS
+// Enable CORS before routing
 app.UseCors("AllowAll");
+
+app.UseRouting();
 
 // Enable authentication and authorization
 app.UseAuthentication();

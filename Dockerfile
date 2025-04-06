@@ -17,6 +17,11 @@ COPY --from=build /app/out .
 # Configure environment variables
 ENV ASPNETCORE_URLS=http://+:80
 ENV ASPNETCORE_ENVIRONMENT=Production
+ENV PORT=80
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=3s \
+    CMD curl -f http://localhost:80/health || exit 1
 
 EXPOSE 80
 ENTRYPOINT ["dotnet", "backend.dll"] 
