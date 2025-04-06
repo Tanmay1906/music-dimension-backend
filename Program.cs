@@ -49,10 +49,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", builder =>
     {
-        builder.WithOrigins(
-                "https://musicdimension-orcin.vercel.app",
-                "http://localhost:3000"
-            )
+        builder.SetIsOriginAllowed(_ => true) // For development only - update this in production
                .AllowAnyMethod()
                .AllowAnyHeader()
                .AllowCredentials();
@@ -82,7 +79,7 @@ else
     app.UseHsts();
 }
 
-// Enable CORS before routing
+// Enable CORS - must be before routing and after Swagger
 app.UseCors("AllowAll");
 
 app.UseRouting();

@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Cors;
 
 [ApiController]
 [Route("api/[controller]")]
+[EnableCors("AllowAll")]
 public class AuthController : ControllerBase
 {
     private readonly IConfiguration _config;
