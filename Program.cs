@@ -49,24 +49,37 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", builder =>
     {
-        builder.SetIsOriginAllowed(_ => true) // For development only - update this in production
-               .AllowAnyMethod()
-               .AllowAnyHeader()
-               .AllowCredentials();
+        builder.WithOrigins(
+                "https://musicdimension-orcin.vercel.app",
+                "http://localhost:3000"
+            )
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .WithExposedHeaders("Authorization");
     });
 });
 
 var app = builder.Build();
 
+// First, use routing
+app.UseRouting();
+
+// Then, use CORS
+app.UseCors("AllowAll");
+
+// Then authentication and authorization
+app.UseAuthentication();
+app.UseAuthorization();
+
 // Map health check endpoint
 app.MapHealthChecks("/health");
 
-// Always enable Swagger in all environments
+// Configure Swagger
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Music Dimension API V1");
-    c.RoutePrefix = string.Empty; // Set Swagger UI at root
+    c.RoutePrefix = string.Empty;
 });
 
 if (app.Environment.IsDevelopment())
@@ -75,19 +88,18 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseExceptionHandler("/Error");
+    app.UseExceptionHandler(builder =>
+    {
+        builder.Run(async context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            await context.Response.WriteAsJsonAsync(new { error = "An error occurred while processing your request." });
+        });
+    });
     app.UseHsts();
 }
 
-// Enable CORS - must be before routing and after Swagger
-app.UseCors("AllowAll");
-
-app.UseRouting();
-
-// Enable authentication and authorization
-app.UseAuthentication();
-app.UseAuthorization();
-
+// Finally, map controllers
 app.MapControllers();
 
 // Run the application

@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Cors;
 
 [ApiController]
 [Route("api/[controller]")]
-[EnableCors("AllowAll")]
 public class AuthController : ControllerBase
 {
     private readonly IConfiguration _config;
@@ -21,60 +20,45 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterModel model)
+    public async Task<ActionResult> Register([FromBody] RegisterModel model)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
-        }
-
-        // In a real app, validate and save to your database
-        if (string.IsNullOrWhiteSpace(model.Username) || 
-            string.IsNullOrWhiteSpace(model.Email) || 
-            string.IsNullOrWhiteSpace(model.Password))
-        {
-            return BadRequest("Username, email, and password are required");
         }
 
         try
         {
-            // Here you would typically:
-            // 1. Check if user already exists
-            // 2. Hash the password
-            // 3. Save to database
-            
-            // For now, just generate a token
             var token = GenerateJwtToken(model.Email);
-            return Ok(new { Token = token });
+            return Ok(new { token = token });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, $"Internal server error: {ex.Message}");
+            return StatusCode(500, new { error = ex.Message });
         }
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginModel userLogin)
+    public async Task<ActionResult> Login([FromBody] LoginModel userLogin)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        // In a real app, validate against your database
         if (string.IsNullOrWhiteSpace(userLogin.Email) || string.IsNullOrWhiteSpace(userLogin.Password))
         {
-            return BadRequest("Email and password are required");
+            return BadRequest(new { error = "Email and password are required" });
         }
 
         try
         {
             var token = GenerateJwtToken(userLogin.Email);
-            return Ok(new { Token = token });
+            return Ok(new { token = token });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, $"Internal server error: {ex.Message}");
+            return StatusCode(500, new { error = ex.Message });
         }
     }
 
