@@ -41,13 +41,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// Configure CORS if needed
+// Configure CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", builder =>
     {
         builder.WithOrigins(
                 "https://Tanmay1906.github.io",
+                "https://music-dimension.onrender.com",
                 "http://localhost:3000"
             )
                .AllowAnyMethod()
@@ -57,11 +58,16 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+// Always enable Swagger in all environments
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Music Dimension API V1");
+    c.RoutePrefix = "swagger";
+});
+
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
     app.UseDeveloperExceptionPage();
 }
 else
@@ -69,6 +75,9 @@ else
     app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
+
+// Redirect root to Swagger UI
+app.MapGet("/", () => Results.Redirect("/swagger"));
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
